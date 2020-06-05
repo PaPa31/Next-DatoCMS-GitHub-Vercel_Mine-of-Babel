@@ -1,9 +1,31 @@
 import { request } from '../lib/datocms'
-import { Image } from 'react-datocms'
-const HOMEPAGE_QUERY = `query HomePage($limit: IntType) {
-  allBlogPosts(first: $limit) {
+import { Image, renderMetaTags } from 'react-datocms'
+import Head from 'next/head'
+
+const HOMEPAGE_QUERY = `
+query HomePage($limit: IntType) {
+  site: _site {
+    favicon: faviconMetaTags {
+      attributes
+      content
+      tag
+    }
+  }
+  blog {
+    seo: _seoMetaTags {
+      attributes
+      content
+      tag
+    }
+  }
+  allPosts(first: $limit) {
     id
     title
+    excerpt
+    date
+    author {
+      name
+    }
     coverImage {
       responsiveImage(imgixParams: { fit: crop, w: 300, h: 300, auto: format }) {
         srcSet
@@ -20,21 +42,25 @@ const HOMEPAGE_QUERY = `query HomePage($limit: IntType) {
     }
   }
 }`
+
 export async function getStaticProps() {
   const data = await request({
     query: HOMEPAGE_QUERY,
     variables: { limit: 10 },
   })
+
   return {
     props: {
       data,
     },
   }
 }
+
 export default function Home({ data }) {
   return (
     <div>
-      {data.allBlogPosts.map((blogPost) => (
+      <Head>{renderMetaTags(data.blog.seo.concat(data.site.favicon))}</Head>
+      {data.allPosts.map((blogPost) => (
         <article key={blogPost.id}>
           <Image data={blogPost.coverImage.responsiveImage} />
           <h6>{blogPost.title}</h6>
