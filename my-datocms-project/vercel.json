@@ -1,0 +1,7 @@
+{
+  "build": {
+    "env": {
+      "NEXT_DATOCMS_API_TOKEN": "cc507ccb53cae61ed9751121202052"
+    }
+  }
+}
